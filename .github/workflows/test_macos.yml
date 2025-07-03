@@ -1,0 +1,21 @@
+# .github/workflows/test-macos.yml
+name: Test macOS # Appears in the Actions tab
+
+on:
+  push: # Trigger on pushes to any branch
+    branches:
+      - main # Change to your default branch if different
+
+jobs:
+  build: # ←--- job *ID* (required)
+    name: Test on macOS # Friendly display name
+    runs-on: macos-latest # GitHub-hosted macOS 14 runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # v4 is the current LTS tag
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Build & run
+        run: cargo run --release --bin test_macos
