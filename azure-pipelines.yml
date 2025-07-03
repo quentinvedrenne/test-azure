@@ -1,0 +1,42 @@
+# azure-pipelines.yml  ── pipeline name: "Test_MacOS"
+trigger: none        # queued manually or via GitHub Actions
+pr: none
+
+# ── parameters GitHub Actions (or you) can fill when the run is queued ──
+parameters:
+- name: GIT_SHA
+  type: string
+  default: ''
+- name: BUILD_ID
+  type: string
+  default: ''
+
+stages:
+- stage: BuildAndRun
+  displayName: "Build & run test_macos on a hosted Mac"
+  jobs:
+  - job: test_macos
+    displayName: "Compile & execute"
+    timeoutInMinutes: 30
+    pool:
+      vmImage: 'macOS-latest'   # currently macOS 14 Sonoma with Xcode 16.x :contentReference[oaicite:0]{index=0}
+    steps:
+
+    # 1️⃣  Check out the repository
+    - checkout: self
+
+    # 2️⃣  Install the Rust toolchain (stable) — rustup is pre-installed
+    - bash: |
+        set -euxo pipefail
+        echo "ℹ️  Commit: ${{ parameters.GIT_SHA }}"
+        echo "ℹ️  Trigger build: ${{ parameters.BUILD_ID }}"
+        rustup toolchain install stable --profile minimal
+        rustup default stable
+        rustc -V && cargo -V
+      displayName: "Set up Rust (stable)"
+
+    # 3️⃣  Compile and run the binary
+    - bash: |
+        set -euxo pipefail
+        cargo run --release --bin test_macos
+      displayName: "cargo run --release --bin test_macos"
